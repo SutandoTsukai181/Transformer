@@ -10,6 +10,7 @@
 #include "libs/imgui/imgui.h"
 #include "libs/imgui/imgui_impl_glfw.h"
 #include "libs/imgui/imgui_impl_opengl3.h"
+#include <Eigen/Dense>
 
 #include <stdio.h>
 #include <GLFW/glfw3.h> // Will drag system OpenGL headers
@@ -135,6 +136,12 @@ int main(int, char**)
         glViewport(0, 0, display_w, display_h);
         glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        glBegin(GL_LINES);
+        glVertex3f(0, 0, 0);
+        glVertex3f(display_w / 2, display_h / 2, 0);
+        glEnd();
+
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         glfwSwapBuffers(window);
