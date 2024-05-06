@@ -3,7 +3,12 @@ project(Transformer)
 
 set(CMAKE_CXX_STANDARD 11)
 
-add_executable(Transformer main.cpp)
+add_executable(Transformer main.cpp
+        Mesh.cpp
+        Mesh.h
+        off_reader.h)
+
+add_compile_definitions(GLAD_GLAPI_EXPORT GLAD_GLAPI_EXPORT_BUILD)
 
 include(CPM.cmake)
 
@@ -33,6 +38,7 @@ target_link_libraries(Transformer OpenGL::GL OpenGL::GLU)
 # imgui
 set(SOURCE_FILES libs/imgui/imgui.cpp libs/imgui/imgui_draw.cpp libs/imgui/imgui_demo.cpp libs/imgui/imgui_tables.cpp libs/imgui/imgui_widgets.cpp libs/imgui/imgui_impl_glfw.cpp libs/imgui/imgui_impl_opengl3.cpp)
 add_library(imgui ${SOURCE_FILES})
+include_directories(libs/imgui)
 target_link_libraries(imgui glfw)
 
 target_link_libraries(Transformer imgui)

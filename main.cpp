@@ -15,6 +15,9 @@
 #include <imgui_impl_opengl3.h>
 #include <Eigen/Dense>
 
+#include "Mesh.h"
+#include "off_reader.h"
+
 #include <stdio.h>
 
 #include <glad/glad.h>
@@ -88,6 +91,40 @@ int main(int, char**)
     bool show_another_window = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
+    glMatrixMode(GL_PROJECTION);
+    glOrtho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
+
+    // Setting camera orientation:
+
+    // Using arrays
+//    float mat[16] = { 1, 0, 0, 0,
+//                      0, 1, 0, 0,
+//                      0, 0, 1, 0,
+//                      0, 0, 0, 1};
+//    glLoadMatrixf(*mat);
+
+    // Using Eigen matrices
+//    Eigen::Matrix4f mat;
+//    mat.setIdentity();
+//    Eigen::Matrix4f rot;
+//    rot << 1, 2, 3, 1,
+//            4, 5, 6, 1,
+//            7, 8, 9, 1;
+//    mat = mat * rot;
+//    glLoadIdentity();
+//    glMultMatrixf(mat.transpose().eval().data());
+//    glTranslated(0, 0, 0);
+//    glScaled(0.2, 0.2, 0.2);
+
+    // Using glu.h
+//    gluLookAt(0, 0, 0.8,
+//              0, 0, 1,
+//              0, 1, 0);
+
+    Mesh mesh;
+    readOff(R"(E:\University\Courses\CNG 477\Assignments\2\MeshsegBenchmark-1.0\data\off\1.off)", mesh);
+    mesh.init();
+
     // Main loop
     while (!glfwWindowShouldClose(window))
     {
@@ -148,10 +185,12 @@ int main(int, char**)
         glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glBegin(GL_LINES);
-        glVertex3f(0, 0, 0);
-        glVertex3f(display_w / 2, display_h / 2, 0);
-        glEnd();
+        mesh.draw();
+//        glBegin(GL_TRIANGLES);
+//        glVertex3f(0.144529, -0.014328, 0.381773);
+//        glVertex3f(-0.15378, -0.045707, 0.361045);
+//        glVertex3f(-0.153917, -0.057275, 0.371308);
+//        glEnd();
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
