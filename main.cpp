@@ -7,13 +7,18 @@
 // - Documentation        https://dearimgui.com/docs (same as your local docs/ folder).
 // - Introduction, links and more at the top of imgui.cpp
 
-#include "libs/imgui/imgui.h"
-#include "libs/imgui/imgui_impl_glfw.h"
-#include "libs/imgui/imgui_impl_opengl3.h"
+#define GL_GLEXT_PROTOTYPES
+#define GLFW_INCLUDE_GLU
+
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 #include <Eigen/Dense>
 
 #include <stdio.h>
-#include <GLFW/glfw3.h> // Will drag system OpenGL headers
+
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 
 static void glfw_error_callback(int error, const char* description)
 {
@@ -56,6 +61,12 @@ int main(int, char**)
         return 1;
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable vsync
+
+    int version = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+    if (version == 0) {
+        printf("Failed to initialize OpenGL context\n");
+        return -1;
+    }
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();

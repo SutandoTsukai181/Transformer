@@ -7,6 +7,11 @@ add_executable(Transformer main.cpp)
 
 include(CPM.cmake)
 
+# glad
+add_library(glad libs/glad/src/glad.c libs/glad/include/glad/glad.h libs/glad/include/KHR/khrplatform.h)
+target_link_libraries(Transformer glad)
+include_directories(libs/glad/include)
+
 # GLFW
 CPMAddPackage(
         NAME GLFW
@@ -23,7 +28,7 @@ if(GLFW_FOUND)
 endif()
 
 find_package(OpenGL REQUIRED)
-target_link_libraries(Transformer OpenGL::GL)
+target_link_libraries(Transformer OpenGL::GL OpenGL::GLU)
 
 # imgui
 set(SOURCE_FILES libs/imgui/imgui.cpp libs/imgui/imgui_draw.cpp libs/imgui/imgui_demo.cpp libs/imgui/imgui_tables.cpp libs/imgui/imgui_widgets.cpp libs/imgui/imgui_impl_glfw.cpp libs/imgui/imgui_impl_opengl3.cpp)
