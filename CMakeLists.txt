@@ -16,7 +16,8 @@ add_executable(Transformer src/main.cpp
         src/cpu_transformer.cpp
         src/cpu_transformer.h
         src/gpu_transformer.cpp
-        src/gpu_transformer.h)
+        src/gpu_transformer.h
+        src/shaders.h)
 
 add_compile_definitions(GLAD_GLAPI_EXPORT GLAD_GLAPI_EXPORT_BUILD)
 

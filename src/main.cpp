@@ -1,12 +1,3 @@
-// Dear ImGui: standalone example application for GLFW + OpenGL 3, using programmable pipeline
-// (GLFW is a cross-platform general purpose library for handling windows, inputs, OpenGL/Vulkan/Metal graphics context creation, etc.)
-
-// Learn about Dear ImGui:
-// - FAQ                  https://dearimgui.com/faq
-// - Getting Started      https://dearimgui.com/getting-started
-// - Documentation        https://dearimgui.com/docs (same as your local docs/ folder).
-// - Introduction, links and more at the top of imgui.cpp
-
 #define GL_GLEXT_PROTOTYPES
 #define GLFW_INCLUDE_GLU
 
@@ -24,10 +15,59 @@
 #include "cpu_transformer.h"
 #include "gpu_transformer.h"
 
+//#include "shaders.h"
+
 static void glfw_error_callback(int error, const char* description)
 {
     fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
+
+//unsigned int v, f, p;
+
+//void setShaders() {
+//    const char *vs,*fs;
+//
+//    v = glCreateShader(GL_VERTEX_SHADER);
+//    f = glCreateShader(GL_FRAGMENT_SHADER);
+//
+//    vs = vertexShaderSource; //put the whole shader code in a string
+//    fs = fragmentShaderSource;
+//
+//    const char * vv = vs;
+//    const char * ff = fs;
+//
+//    glShaderSource(v, 1, &vv,NULL);
+////    glShaderSource(f, 1, &ff,NULL);
+//
+////    free(vs);free(fs);
+//
+//    glCompileShader(v);
+////    glCompileShader(f);
+//
+//    GLint success = 0;
+////    glGetShaderiv(v, GL_COMPILE_STATUS, &success);
+////    std::cout << "Compile status: " << success << std::endl;
+////
+////    glGetShaderiv(f, GL_COMPILE_STATUS, &success);
+////    std::cout << "Compile status: " << success << std::endl;
+//
+//    GLint logSize = 0;
+//    glGetShaderiv(v, GL_INFO_LOG_LENGTH, &logSize);
+//
+//    char* log = new char[logSize];
+//    glGetShaderInfoLog(v, logSize, &logSize, &log[0]);
+//
+//    std::cout << log << std::endl;
+//
+//    p = glCreateProgram();
+//
+//    glAttachShader(p,v);
+////    glAttachShader(p,f);
+//
+//    glLinkProgram(p);
+//    glUseProgram(p);
+//}
+
 
 // Main code
 int main(int, char**)
@@ -60,7 +100,7 @@ int main(int, char**)
 #endif
 
     // Create window with graphics context
-    GLFWwindow* window = glfwCreateWindow(1280, 720, "Dear ImGui GLFW+OpenGL3 example", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(1280, 720, "Transformer", nullptr, nullptr);
     if (window == nullptr)
         return 1;
     glfwMakeContextCurrent(window);
@@ -88,70 +128,24 @@ int main(int, char**)
     ImGui_ImplOpenGL3_Init(glsl_version);
 
     // Our state
-    bool show_demo_window = true;
-    bool show_another_window = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
     ImVec4 model_color = ImVec4(0.0f, 1.0f, 0.0f, 1.00f);
 
+    // Camera
     glMatrixMode(GL_PROJECTION);
     glOrtho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
-
-    // Setting camera orientation:
-
-    // Using arrays
-//    float mat[16] = { 1, 0, 0, 0,
-//                      0, 1, 0, 0,
-//                      0, 0, 1, 0,
-//                      0, 0, 0, 1};
-//    glLoadMatrixf(*mat);
-
-    // Using Eigen matrices
-//    Eigen::Matrix4f mat;
-//    mat.setIdentity();
-//    Eigen::Matrix4f rot;
-//    rot << 1, 2, 3, 1,
-//            4, 5, 6, 1,
-//            7, 8, 9, 1;
-//    mat = mat * rot;
-//    glLoadIdentity();
-//    glMultMatrixf(mat.transpose().eval().data());
-//    glTranslated(0, 0, 0);
-//    glScaled(0.2, 0.2, 0.2);
-
-    // Using glu.h
-//    gluLookAt(0, 0, 0.8,
-//              0, 0, 1,
-//              0, 1, 0);
 
     bool isCpuMode = true;
     BaseTransformer *transformer = new CpuTransformer();
     transformer->setLocalTrans(true);
 
-//    transformer->read(R"(E:\University\Courses\CNG 477\Assignments\2\MeshsegBenchmark-1.0\data\off\2.off)");
-
-//    transformer->translate(Eigen::Vector3f(0.5, -0.2, 0));
-
-//    transformer->rotateAroundX(90, 0, 0);
-//    transformer->rotateAroundY(90, 0, 0);
-//    transformer->rotateAroundZ(90, 0, 0);
-
-//    transformer->rotateAroundArbitraryAxis(90, Eigen::Vector3f(0, 0, 0), Eigen::Vector3f(0, 1, 0));
-
-//    transformer->rotateAroundY(90, 0, 0);
-
-//    transformer->reset();
-
-//    transformer->shearX(2, 0);
-//    transformer->reflectOverPlane(Eigen::Vector3f::Zero(), Eigen::Vector3f(0, 1, 0));
+//    setShaders();
+//    glUniformMatrix4fv(glGetUniformLocation(v, "transformationMatrix"), 1, GL_FALSE, );
 
     // Main loop
     while (!glfwWindowShouldClose(window))
     {
         // Poll and handle events (inputs, window resize, etc.)
-        // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
-        // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
-        // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
-        // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
         glfwPollEvents();
 
         // Start the Dear ImGui frame
@@ -337,6 +331,7 @@ int main(int, char**)
         glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
 
+//        glUseProgram(p);
         glColor3f(model_color.x * clear_color.w, model_color.y * clear_color.w, model_color.z * clear_color.w);
         transformer->draw();
 
