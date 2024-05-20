@@ -7,6 +7,8 @@ void CpuTransformer::translate(Eigen::Vector3f t) {
 }
 
 void CpuTransformer::rotateAroundX(float angle, float y, float z) {
+    angle *= EIGEN_PI / 180;
+
     Eigen::Matrix4f mat;
     mat <<  1, 0, 0, 0,
             0, std::cos(angle), -std::sin(angle), 0,
@@ -17,6 +19,8 @@ void CpuTransformer::rotateAroundX(float angle, float y, float z) {
 }
 
 void CpuTransformer::rotateAroundY(float angle, float x, float z) {
+    angle *= EIGEN_PI / 180;
+
     Eigen::Matrix4f mat;
     mat <<  std::cos(angle), 0, std::sin(angle), 0,
             0, 1, 0, 0,
@@ -27,6 +31,8 @@ void CpuTransformer::rotateAroundY(float angle, float x, float z) {
 }
 
 void CpuTransformer::rotateAroundZ(float angle, float x, float y) {
+    angle *= EIGEN_PI / 180;
+
     Eigen::Matrix4f mat;
     mat <<  std::cos(angle), -std::sin(angle), 0, 0,
             std::sin(angle), std::cos(angle), 0, 0,
@@ -38,6 +44,7 @@ void CpuTransformer::rotateAroundZ(float angle, float x, float y) {
 
 void CpuTransformer::rotateAroundArbitraryAxis(float angle, Eigen::Vector3f p1, Eigen::Vector3f p2) {
     auto mat = alignWithZAxisMat(p1, p2 - p1);
+    angle *= EIGEN_PI / 180;
 
     Eigen::Matrix4f rotAroundZ;
     rotAroundZ <<   std::cos(angle), -std::sin(angle), 0, 0,
@@ -100,9 +107,16 @@ void CpuTransformer::shearZ(float sx, float sy) {
     applyTransformation(mat);
 }
 
-void CpuTransformer::applyTransformation(const Eigen::Matrix4f& mat) {
+void CpuTransformer::applyTransformation(Eigen::Matrix4f mat) {
     float* vertices;
     int size;
+
+    Eigen::Matrix4f oldCurrentInv = currentMatrix.inverse();
+    currentMatrix = currentMatrix * mat;
+    if (isLocalTrans()) {
+        // Multiply by inverse to apply transformation locally
+        mat = currentMatrix * oldCurrentInv;
+    }
 
     mesh.mapVertexBuffer(vertices, size);
 
@@ -153,4 +167,9 @@ Eigen::Matrix4f CpuTransformer::alignWithZAxisMat(const Eigen::Vector3f& p, cons
             0, 0, 0, 1;
 
     return rotAroundY * rotAroundX * transToOrigin;
+}
+
+void CpuTransformer::reset() {
+    mesh.reset();
+    currentMatrix.setIdentity();
 }

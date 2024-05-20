@@ -21,6 +21,7 @@
 #include "GLFW/glfw3.h"
 
 #include "cpu_transformer.h"
+#include "gpu_transformer.h"
 
 static void glfw_error_callback(int error, const char* description)
 {
@@ -120,19 +121,24 @@ int main(int, char**)
 //              0, 0, 1,
 //              0, 1, 0);
 
-    CpuTransformer transformer;
+    GpuTransformer transformer;
     transformer.read(R"(E:\University\Courses\CNG 477\Assignments\2\MeshsegBenchmark-1.0\data\off\2.off)");
 
-    Eigen::Vector3f v;
-//    v << 0, 0, 0;
-//    transformer.translate(v);
-    transformer.rotateAroundX(90 * EIGEN_PI /  180, 0, 0);
-    transformer.rotateAroundY(90 * EIGEN_PI /  180, 0, 0);
-    transformer.rotateAroundZ(90 * EIGEN_PI /  180, 0, 0);
+    transformer.setLocalTrans(true);
+//    transformer.translate(Eigen::Vector3f(0.5, -0.2, 0));
 
-//    transformer.rotateAroundY(90 * EIGEN_PI /  180, 0, 0);
+    transformer.rotateAroundX(90, 0, 0);
+    transformer.rotateAroundY(90, 0, 0);
+    transformer.rotateAroundZ(90, 0, 0);
+
+//    transformer.rotateAroundArbitraryAxis(90, Eigen::Vector3f(0, 0, 0), Eigen::Vector3f(0, 1, 0));
+
+//    transformer.rotateAroundY(90, 0, 0);
 
 //    transformer.reset();
+
+    transformer.shearX(2, 0);
+//    transformer.reflectOverPlane(Eigen::Vector3f::Zero(), Eigen::Vector3f(0, 1, 0));
 
     // Main loop
     while (!glfwWindowShouldClose(window))

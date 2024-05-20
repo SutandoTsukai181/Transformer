@@ -1,9 +1,10 @@
-#ifndef TRANSFORMER_CPU_TRANSFORMER_H
-#define TRANSFORMER_CPU_TRANSFORMER_H
+#ifndef TRANSFORMER_GPU_TRANSFORMER_H
+#define TRANSFORMER_GPU_TRANSFORMER_H
+
 
 #include "base_transformer.h"
 
-class CpuTransformer : public BaseTransformer {
+class GpuTransformer : public BaseTransformer {
 public:
     void translate(Eigen::Vector3f t) override;
 
@@ -27,13 +28,11 @@ public:
 
     void reset() override;
 
-private:
-    static Eigen::Matrix4f translateMat(float tx, float ty, float tz);
-    static Eigen::Matrix4f alignWithZAxisMat(const Eigen::Vector3f& p, const Eigen::Vector3f& v);
-    void applyTransformation(Eigen::Matrix4f mat);
+    bool isLocalTrans() override;
 
+private:
     Eigen::Matrix4f currentMatrix = Eigen::Matrix4f::Identity();
 };
 
 
-#endif //TRANSFORMER_CPU_TRANSFORMER_H
+#endif //TRANSFORMER_GPU_TRANSFORMER_H

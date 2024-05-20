@@ -18,11 +18,16 @@ public:
     virtual void shearX(float sy, float sz) = 0;
     virtual void shearY(float sx, float sz) = 0;
     virtual void shearZ(float sx, float sy) = 0;
+    virtual void reset() = 0;
     void read(const std::string& filename);
     void draw();
-    void reset();
+
+    virtual bool isLocalTrans();
+    void setLocalTrans(bool isLocal);
+
 protected:
     Mesh mesh;
+    bool isLocal = false;
 };
 
 

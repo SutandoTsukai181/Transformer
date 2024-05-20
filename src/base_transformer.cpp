@@ -14,6 +14,10 @@ void BaseTransformer::draw() {
     mesh.draw();
 }
 
-void BaseTransformer::reset() {
-    mesh.reset();
+bool BaseTransformer::isLocalTrans() {
+    return isLocal;
+}
+
+void BaseTransformer::setLocalTrans(bool isLocal) {
+    this->isLocal = isLocal;
 }
