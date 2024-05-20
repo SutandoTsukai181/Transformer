@@ -6,6 +6,9 @@
 
 class GpuTransformer : public BaseTransformer {
 public:
+    GpuTransformer();
+    explicit GpuTransformer(BaseTransformer* other);
+
     void translate(Eigen::Vector3f t) override;
 
     void rotateAroundX(float angle, float y, float z) override;
@@ -29,9 +32,6 @@ public:
     void reset() override;
 
     bool isLocalTrans() override;
-
-private:
-    Eigen::Matrix4f currentMatrix = Eigen::Matrix4f::Identity();
 };
 
 

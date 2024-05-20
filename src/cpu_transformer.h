@@ -5,6 +5,9 @@
 
 class CpuTransformer : public BaseTransformer {
 public:
+    CpuTransformer();
+    explicit CpuTransformer(BaseTransformer* other);
+
     void translate(Eigen::Vector3f t) override;
 
     void rotateAroundX(float angle, float y, float z) override;

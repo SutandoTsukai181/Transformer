@@ -2,6 +2,14 @@
 
 #include <cmath>
 
+CpuTransformer::CpuTransformer() {
+
+}
+
+CpuTransformer::CpuTransformer(BaseTransformer *other) : BaseTransformer(other) {
+
+}
+
 void CpuTransformer::translate(Eigen::Vector3f t) {
     applyTransformation(translateMat(t[0], t[1], t[2]));
 }

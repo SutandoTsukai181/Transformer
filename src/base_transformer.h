@@ -7,7 +7,7 @@
 class BaseTransformer {
 public:
     BaseTransformer();
-    ~BaseTransformer();
+    explicit BaseTransformer(BaseTransformer* other);
     virtual void translate(Eigen::Vector3f t) = 0;
     virtual void rotateAroundX(float angle, float y, float z) = 0;
     virtual void rotateAroundY(float angle, float x, float z) = 0;
@@ -19,15 +19,18 @@ public:
     virtual void shearY(float sx, float sz) = 0;
     virtual void shearZ(float sx, float sy) = 0;
     virtual void reset() = 0;
-    void read(const std::string& filename);
+    bool read(const std::string& filename);
     void draw();
 
     virtual bool isLocalTrans();
     void setLocalTrans(bool isLocal);
 
+    bool isInitialized();
+
 protected:
     Mesh mesh;
     bool isLocal = false;
+    bool isInit = false;
 };
 
 

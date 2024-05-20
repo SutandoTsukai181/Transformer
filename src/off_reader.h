@@ -4,8 +4,12 @@
 #include <fstream>
 #include "mesh.h"
 
-void readOff(const std::string& filename, Mesh& mesh) {
+bool readOff(const std::string& filename, Mesh& mesh) {
     std::ifstream file(filename);
+
+    if (!file.good()) {
+        return false;
+    }
 
     // Header
     std::string off;
@@ -34,6 +38,8 @@ void readOff(const std::string& filename, Mesh& mesh) {
     mesh.setFaces(faces, faceCount * 3);
 
     file.close();
+
+    return true;
 }
 
 #endif //TRANSFORMER_OFF_READER_H

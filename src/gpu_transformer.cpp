@@ -1,5 +1,13 @@
 #include "gpu_transformer.h"
 
+GpuTransformer::GpuTransformer() {
+
+}
+
+GpuTransformer::GpuTransformer(BaseTransformer *other) : BaseTransformer(other) {
+
+}
+
 void GpuTransformer::translate(Eigen::Vector3f t) {
     glMatrixMode(GL_MODELVIEW);
     glTranslatef(t[0], t[1], t[2]);

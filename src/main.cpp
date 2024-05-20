@@ -16,6 +16,7 @@
 #include <Eigen/Dense>
 
 #include <stdio.h>
+#include <iostream>
 
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
@@ -90,6 +91,7 @@ int main(int, char**)
     bool show_demo_window = true;
     bool show_another_window = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    ImVec4 model_color = ImVec4(0.0f, 1.0f, 0.0f, 1.00f);
 
     glMatrixMode(GL_PROJECTION);
     glOrtho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
@@ -121,24 +123,26 @@ int main(int, char**)
 //              0, 0, 1,
 //              0, 1, 0);
 
-    GpuTransformer transformer;
-    transformer.read(R"(E:\University\Courses\CNG 477\Assignments\2\MeshsegBenchmark-1.0\data\off\2.off)");
+    bool isCpuMode = true;
+    BaseTransformer *transformer = new CpuTransformer();
+    transformer->setLocalTrans(true);
 
-    transformer.setLocalTrans(true);
-//    transformer.translate(Eigen::Vector3f(0.5, -0.2, 0));
+//    transformer->read(R"(E:\University\Courses\CNG 477\Assignments\2\MeshsegBenchmark-1.0\data\off\2.off)");
 
-    transformer.rotateAroundX(90, 0, 0);
-    transformer.rotateAroundY(90, 0, 0);
-    transformer.rotateAroundZ(90, 0, 0);
+//    transformer->translate(Eigen::Vector3f(0.5, -0.2, 0));
 
-//    transformer.rotateAroundArbitraryAxis(90, Eigen::Vector3f(0, 0, 0), Eigen::Vector3f(0, 1, 0));
+//    transformer->rotateAroundX(90, 0, 0);
+//    transformer->rotateAroundY(90, 0, 0);
+//    transformer->rotateAroundZ(90, 0, 0);
 
-//    transformer.rotateAroundY(90, 0, 0);
+//    transformer->rotateAroundArbitraryAxis(90, Eigen::Vector3f(0, 0, 0), Eigen::Vector3f(0, 1, 0));
 
-//    transformer.reset();
+//    transformer->rotateAroundY(90, 0, 0);
 
-    transformer.shearX(2, 0);
-//    transformer.reflectOverPlane(Eigen::Vector3f::Zero(), Eigen::Vector3f(0, 1, 0));
+//    transformer->reset();
+
+//    transformer->shearX(2, 0);
+//    transformer->reflectOverPlane(Eigen::Vector3f::Zero(), Eigen::Vector3f(0, 1, 0));
 
     // Main loop
     while (!glfwWindowShouldClose(window))
@@ -155,40 +159,173 @@ int main(int, char**)
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-        if (show_demo_window)
-            ImGui::ShowDemoWindow(&show_demo_window);
+//        ImGui::ShowDemoWindow();
 
-        // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
         {
-            static float f = 0.0f;
-            static int counter = 0;
+            ImGui::Begin("Transformer config");
 
-            ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+            ImGui::SeparatorText("Model & mode");
 
-            ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-            ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-            ImGui::Checkbox("Another Window", &show_another_window);
+            static bool fileLoadError = false;
+            static char filepath[PATH_MAX];
+            ImGui::InputText("File path", filepath, PATH_MAX);
+            if (ImGui::Button("Load .off model")) {
+                transformer->read(std::string(filepath));
+            }
 
-            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+            if (transformer->isInitialized()) {
+                static bool isLocalMode = transformer->isLocalTrans();
 
-            if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-                counter++;
-            ImGui::SameLine();
-            ImGui::Text("counter = %d", counter);
+                if (isCpuMode) {
+                    ImGui::Text("Current mode: CPU"); ImGui::SameLine();
+                    if (ImGui::Button("Switch to GPU mode")) {
+                        isCpuMode = false;
+                        transformer->reset();
 
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-            ImGui::End();
-        }
+                        BaseTransformer* transformer1 = new GpuTransformer(transformer);
+                        delete transformer;
+                        transformer = transformer1;
+                    }
 
-        // 3. Show another simple window.
-        if (show_another_window)
-        {
-            ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-            ImGui::Text("Hello from another window!");
-            if (ImGui::Button("Close Me"))
-                show_another_window = false;
+                    if (ImGui::Checkbox("Use local transformations", &isLocalMode)) {
+                        transformer->setLocalTrans(isLocalMode);
+                    }
+                } else {
+                    ImGui::Text("Current mode: GPU"); ImGui::SameLine();
+                    if (ImGui::Button("Switch to CPU mode")) {
+                        isCpuMode = true;
+                        transformer->reset();
+
+                        BaseTransformer* transformer1 = new CpuTransformer(transformer);
+                        delete transformer;
+                        transformer = transformer1;
+
+                        // Set local mode for CPU
+                        isLocalMode = transformer->isLocalTrans();
+                    }
+
+                    ImGui::Text("Using local transformations on GPU");
+                }
+
+                if (ImGui::Button("RESET")) {
+                    transformer->reset();
+                }
+
+                ImGui::SeparatorText("Colors");
+                ImGui::ColorEdit3("Background color", (float*)&clear_color);
+                ImGui::ColorEdit3("Model color", (float*)&model_color);
+
+                // TRANSLATION
+                ImGui::SeparatorText("Translation");
+
+                static float transVec[3] = { 0.1, 0, 0 };
+                ImGui::InputFloat3("vector", transVec);
+
+                if (ImGui::Button("Apply##Trans")) {
+                    transformer->translate(Eigen::Vector3f(transVec));
+                }
+
+                // ROTATION
+                ImGui::SeparatorText("Rotation around parallel axis");
+
+                static float angle = 90;
+                ImGui::InputFloat("angle (deg)", &angle);
+
+                static int axis = 1;
+                ImGui::RadioButton("X Axis", &axis, 0); ImGui::SameLine();
+                ImGui::RadioButton("Y Axis", &axis, 1); ImGui::SameLine();
+                ImGui::RadioButton("Z Axis", &axis, 2);
+
+                static float rotVec[2] = { 0, 0 };
+                if (axis == 0) {
+                    ImGui::InputFloat2("axis y, z components", rotVec);
+                } else if (axis == 1) {
+                    ImGui::InputFloat2("axis x, z components", rotVec);
+                } else if (axis == 2) {
+                    ImGui::InputFloat2("axis x, y components", rotVec);
+                }
+
+                if (ImGui::Button("Apply##Rot")) {
+                    if (axis == 0) {
+                        transformer->rotateAroundX(angle, rotVec[0], rotVec[1]);
+                    } else if (axis == 1) {
+                        transformer->rotateAroundY(angle, rotVec[0], rotVec[1]);
+                    } else if (axis == 2) {
+                        transformer->rotateAroundZ(angle, rotVec[0], rotVec[1]);
+                    }
+                }
+
+                // ROTATION AXIS
+                ImGui::SeparatorText("Rotation around arbitrary axis");
+
+                static float angle2 = 90;
+                ImGui::InputFloat("angle (deg)", &angle2);
+
+                static float rotAxisP1[3] = { 0, 0, 0 };
+                ImGui::InputFloat3("point 1", rotAxisP1);
+
+                static float rotAxisP2[3] = { 0, 0, 1 };
+                ImGui::InputFloat3("point 2", rotAxisP2);
+
+                if (ImGui::Button("Apply##RotAxis")) {
+                    transformer->rotateAroundArbitraryAxis(angle2, Eigen::Vector3f(rotAxisP1), Eigen::Vector3f(rotAxisP2));
+                }
+
+                // SCALING
+                ImGui::SeparatorText("Scale with respect to fixed point");
+
+                static float scaleFactor[3] = { 0.9, 0.9, 0.9 };
+                ImGui::InputFloat3("scale factor", scaleFactor);
+
+                static float scalePoint[3] = { 0, 0, 0 };
+                ImGui::InputFloat3("point", scalePoint);
+
+                if (ImGui::Button("Apply##Scale")) {
+                    transformer->scaleFromPoint(Eigen::Vector3f(scaleFactor), Eigen::Vector3f(scalePoint));
+                }
+
+                // REFLECTION
+                ImGui::SeparatorText("Reflection over an arbitrary plane");
+
+                static float planePoint[3] = { 0, 0, 0 };
+                ImGui::InputFloat3("point on plane", planePoint);
+
+                static float planeNormal[3] = { 0, 1, 0 };
+                ImGui::InputFloat3("plane normal", planeNormal);
+
+                if (ImGui::Button("Apply##Reflect")) {
+                    transformer->reflectOverPlane(Eigen::Vector3f(planePoint), Eigen::Vector3f(planeNormal));
+                }
+
+                // SHEARING
+                ImGui::SeparatorText("Shearing");
+
+                static int shearDir = 0;
+                ImGui::RadioButton("X direction", &shearDir, 0); ImGui::SameLine();
+                ImGui::RadioButton("Y direction", &shearDir, 1); ImGui::SameLine();
+                ImGui::RadioButton("Z direction", &shearDir, 2);
+
+                static float shearVec[2] = { 0.1, 0 };
+                if (shearDir == 0) {
+                    ImGui::InputFloat2("shear y, z components", shearVec);
+                } else if (shearDir == 1) {
+                    ImGui::InputFloat2("shear x, z components", shearVec);
+                } else if (shearDir == 2) {
+                    ImGui::InputFloat2("shear x, y components", shearVec);
+                }
+
+                if (ImGui::Button("Apply##Shear")) {
+                    if (shearDir == 0) {
+                        transformer->shearX(shearVec[0], shearVec[1]);
+                    } else if (shearDir == 1) {
+                        transformer->shearY(shearVec[0], shearVec[1]);
+                    } else if (shearDir == 2) {
+                        transformer->shearZ(shearVec[0], shearVec[1]);
+                    }
+                }
+
+            }
+
             ImGui::End();
         }
 
@@ -200,13 +337,8 @@ int main(int, char**)
         glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glColor3f(0, 1, 0);
-        transformer.draw();
-//        glBegin(GL_TRIANGLES);
-//        glVertex3f(0.144529, -0.014328, 0.381773);
-//        glVertex3f(-0.15378, -0.045707, 0.361045);
-//        glVertex3f(-0.153917, -0.057275, 0.371308);
-//        glEnd();
+        glColor3f(model_color.x * clear_color.w, model_color.y * clear_color.w, model_color.z * clear_color.w);
+        transformer->draw();
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
