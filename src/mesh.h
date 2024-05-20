@@ -5,17 +5,20 @@
 #include <vector>
 
 #define GL_GLEXT_PROTOTYPES
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+#include "glad/glad.h"
+#include "GLFW/glfw3.h"
 
 class Mesh {
 public:
     Mesh();
     void init();
     void draw();
+    void reset();
     void setVertices(float* vertices, int size);
     void setFaces(unsigned short* faces, int size);
-//private:
+    void mapVertexBuffer(float*& vertices, int& size);
+    void unmapVertexBuffer();
+private:
     int verticesSize, facesSize;
     float* vertices;
     unsigned short* faces;

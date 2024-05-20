@@ -1,4 +1,4 @@
-#include "Mesh.h"
+#include "mesh.h"
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
 Mesh::Mesh() {
@@ -36,4 +36,20 @@ void Mesh::setVertices(float* vertices, int size) {
 void Mesh::setFaces(unsigned short* faces, int size) {
     this->faces = faces;
     facesSize = size;
+}
+
+void Mesh::reset() {
+    // Copy vertices to buffer
+    auto* mapped = (float*)glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
+    std::memcpy(mapped, vertices, verticesSize * sizeof(float));
+    glUnmapBuffer(GL_ARRAY_BUFFER);
+}
+
+void Mesh::mapVertexBuffer(float *&vertices, int &size) {
+    vertices = (float*)glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
+    size = verticesSize;
+}
+
+void Mesh::unmapVertexBuffer() {
+    glUnmapBuffer(GL_ARRAY_BUFFER);
 }

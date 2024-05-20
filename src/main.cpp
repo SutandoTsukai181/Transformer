@@ -10,18 +10,17 @@
 #define GL_GLEXT_PROTOTYPES
 #define GLFW_INCLUDE_GLU
 
-#include <imgui.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 #include <Eigen/Dense>
-
-#include "Mesh.h"
-#include "off_reader.h"
 
 #include <stdio.h>
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+#include "glad/glad.h"
+#include "GLFW/glfw3.h"
+
+#include "cpu_transformer.h"
 
 static void glfw_error_callback(int error, const char* description)
 {
@@ -121,9 +120,19 @@ int main(int, char**)
 //              0, 0, 1,
 //              0, 1, 0);
 
-    Mesh mesh;
-    readOff(R"(E:\University\Courses\CNG 477\Assignments\2\MeshsegBenchmark-1.0\data\off\1.off)", mesh);
-    mesh.init();
+    CpuTransformer transformer;
+    transformer.read(R"(E:\University\Courses\CNG 477\Assignments\2\MeshsegBenchmark-1.0\data\off\2.off)");
+
+    Eigen::Vector3f v;
+//    v << 0, 0, 0;
+//    transformer.translate(v);
+    transformer.rotateAroundX(90 * EIGEN_PI /  180, 0, 0);
+    transformer.rotateAroundY(90 * EIGEN_PI /  180, 0, 0);
+    transformer.rotateAroundZ(90 * EIGEN_PI /  180, 0, 0);
+
+//    transformer.rotateAroundY(90 * EIGEN_PI /  180, 0, 0);
+
+//    transformer.reset();
 
     // Main loop
     while (!glfwWindowShouldClose(window))
@@ -185,7 +194,8 @@ int main(int, char**)
         glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        mesh.draw();
+        glColor3f(0, 1, 0);
+        transformer.draw();
 //        glBegin(GL_TRIANGLES);
 //        glVertex3f(0.144529, -0.014328, 0.381773);
 //        glVertex3f(-0.15378, -0.045707, 0.361045);

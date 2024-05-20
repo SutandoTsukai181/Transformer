@@ -1,5 +1,8 @@
+#ifndef TRANSFORMER_OFF_READER_H
+#define TRANSFORMER_OFF_READER_H
+
 #include <fstream>
-#include "Mesh.h"
+#include "mesh.h"
 
 void readOff(const std::string& filename, Mesh& mesh) {
     std::ifstream file(filename);
@@ -32,3 +35,5 @@ void readOff(const std::string& filename, Mesh& mesh) {
 
     file.close();
 }
+
+#endif //TRANSFORMER_OFF_READER_H

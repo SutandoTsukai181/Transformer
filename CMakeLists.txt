@@ -3,10 +3,18 @@ project(Transformer)
 
 set(CMAKE_CXX_STANDARD 11)
 
-add_executable(Transformer main.cpp
-        Mesh.cpp
-        Mesh.h
-        off_reader.h)
+#set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
+add_executable(Transformer src/main.cpp
+        src/mesh.cpp
+        src/mesh.h
+        src/off_reader.h
+        src/base_transformer.cpp
+        src/base_transformer.h
+        src/cpu_transformer.cpp
+        src/cpu_transformer.h)
 
 add_compile_definitions(GLAD_GLAPI_EXPORT GLAD_GLAPI_EXPORT_BUILD)
 
