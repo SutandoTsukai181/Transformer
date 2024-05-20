@@ -37,27 +37,67 @@ void CpuTransformer::rotateAroundZ(float angle, float x, float y) {
 }
 
 void CpuTransformer::rotateAroundArbitraryAxis(float angle, Eigen::Vector3f p1, Eigen::Vector3f p2) {
+    auto mat = alignWithZAxisMat(p1, p2 - p1);
 
+    Eigen::Matrix4f rotAroundZ;
+    rotAroundZ <<   std::cos(angle), -std::sin(angle), 0, 0,
+                    std::sin(angle), std::cos(angle), 0, 0,
+                    0, 0, 1, 0,
+                    0, 0, 0, 1;
+
+    applyTransformation(mat.inverse() * rotAroundZ * mat);
 }
 
 void CpuTransformer::scaleFromPoint(Eigen::Vector3f s, Eigen::Vector3f p) {
+    Eigen::Matrix4f mat;
+    mat <<  s[0], 0, 0, 0,
+            0, s[1], 0, 0,
+            0, 0, s[2], 0,
+            0, 0, 0, 1;
 
+    applyTransformation(translateMat(p[0], p[1], p[2]) * mat * translateMat(-p[0], -p[1], -p[2]));
 }
 
 void CpuTransformer::reflectOverPlane(Eigen::Vector3f p, Eigen::Vector3f n) {
+    auto mat = alignWithZAxisMat(p, n);
 
+    Eigen::Matrix4f reflectOverXY;
+    reflectOverXY <<    1, 0, 0, 0,
+                        0, 1, 0, 0,
+                        0, 0, -1, 0,
+                        0, 0, 0, 1;
+
+    applyTransformation(mat.inverse() * reflectOverXY * mat);
 }
 
 void CpuTransformer::shearX(float sy, float sz) {
+    Eigen::Matrix4f mat;
+    mat <<  1, sy, sz, 0,
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1;
 
+    applyTransformation(mat);
 }
 
 void CpuTransformer::shearY(float sx, float sz) {
+    Eigen::Matrix4f mat;
+    mat <<  1, 0, 0, 0,
+            sx, 1, sz, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1;
 
+    applyTransformation(mat);
 }
 
 void CpuTransformer::shearZ(float sx, float sy) {
+    Eigen::Matrix4f mat;
+    mat <<  1, 0, 0, 0,
+            0, 1, 0, 0,
+            sx, sy, 1, 0,
+            0, 0, 0, 1;
 
+    applyTransformation(mat);
 }
 
 void CpuTransformer::applyTransformation(const Eigen::Matrix4f& mat) {
@@ -91,4 +131,26 @@ Eigen::Matrix4f CpuTransformer::translateMat(float tx, float ty, float tz) {
             0, 0, 0, 1;
 
     return mat;
+}
+
+Eigen::Matrix4f CpuTransformer::alignWithZAxisMat(const Eigen::Vector3f& p, const Eigen::Vector3f& v) {
+    auto u = v.normalized();
+    float a = u.x(), b = u.y(), c = u.z();
+    float d = sqrtf(b * b + c * c);
+
+    auto transToOrigin = translateMat(-p[0], -p[1], -p[2]);
+
+    Eigen::Matrix4f rotAroundX;
+    rotAroundX <<   1, 0, 0, 0,
+            0, c/d, -b/d, 0,
+            0, b/d, c/d, 0,
+            0, 0, 0, 1;
+
+    Eigen::Matrix4f rotAroundY;
+    rotAroundY <<   d/u.norm(), 0, a/u.norm(), 0,
+            0, 1, 0, 0,
+            -a/u.norm(), 0, d/u.norm(), 0,
+            0, 0, 0, 1;
+
+    return rotAroundY * rotAroundX * transToOrigin;
 }

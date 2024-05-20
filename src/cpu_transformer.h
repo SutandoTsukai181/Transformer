@@ -27,6 +27,7 @@ public:
 
 private:
     static Eigen::Matrix4f translateMat(float tx, float ty, float tz);
+    static Eigen::Matrix4f alignWithZAxisMat(const Eigen::Vector3f& p, const Eigen::Vector3f& v);
     void applyTransformation(const Eigen::Matrix4f& mat);
 };
 
